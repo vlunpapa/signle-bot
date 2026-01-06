@@ -1,0 +1,38 @@
+# 分析层配置
+
+analysis:
+  # 时间窗口配置
+  window:
+    size: 300  # 时间窗口大小（秒），默认5分钟
+    overlap: 60  # 窗口重叠（秒），默认1分钟
+    min_messages: 2  # 最少消息数才触发分析
+    max_messages: 50  # 最多分析消息数
+    check_interval: 60  # 检查间隔（秒），默认1分钟
+  
+  # 分析器配置
+  analyzers:
+    script:
+      enabled: true
+      script_path: null  # 自定义脚本路径，null则使用默认分析
+      timeout: 10  # 脚本执行超时（秒）
+    
+    llm:
+      enabled: false  # LLM分析器暂不启用
+      provider: "openai"  # openai, anthropic, gemini
+      model: "gpt-4"
+      temperature: 0.3
+      max_tokens: 1000
+      api_key: "${LLM_API_KEY}"  # 从环境变量读取
+  
+  # 策略生成配置
+  strategy_generation:
+    auto_generate: false  # 是否自动生成策略
+    auto_enable: false  # 是否自动启用生成的策略
+    min_confidence: 0.7  # 最低置信度阈值
+    validation: true  # 是否验证策略
+  
+  # 消息解析配置
+  message_parsing:
+    patterns_file: null  # 自定义模式文件，null则使用默认模式
+    fallback_llm: false  # 解析失败时使用LLM（暂不支持）
+

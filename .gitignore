@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+ENV/
+
+# 配置文件
+.env
+config/*.db
+config/*.json
+
+# 数据目录
+data/
+*.db
+*.sqlite
+
+# 日志
+logs/
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Docker
+.docker/
+
+# 其他
+.DS_Store
+Thumbs.db
+

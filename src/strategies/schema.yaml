@@ -1,0 +1,144 @@
+# 策略YAML Schema示例
+# 支持K线模式和链上模式的双字段映射
+
+strategies:
+  # 示例1: K线模式策略 - 量增价升
+  - name: "量增价升"
+    description: "成交量增加且价格上涨"
+    mode: "kline"  # 或 "onchain" 或 "both"
+    enabled: true
+    
+    # 条件表达式（支持多条件AND/OR）
+    conditions:
+      - field: "volume"
+        operator: ">"
+        value: "{{ volume_mult }} * avg_volume_24h"  # 支持变量引用
+        description: "成交量大于24小时平均值的N倍"
+      
+      - field: "close"
+        operator: ">"
+        value: "open"
+        description: "收盘价高于开盘价"
+      
+      - field: "volume_change"
+        operator: ">"
+        value: 0.2
+        description: "成交量增长超过20%"
+    
+    # 字段映射（K线模式）
+    kline_fields:
+      volume: "volume"
+      price: "close"
+      volume_change: "(volume - prev_volume) / prev_volume"
+      avg_volume_24h: "avg(volume, 24h)"
+    
+    # 字段映射（链上模式）
+    onchain_fields:
+      volume: "total_volume"
+      price: "price"
+      volume_change: "(total_volume - prev_total_volume) / prev_total_volume"
+      avg_volume_24h: "avg(total_volume, 24h)"
+    
+    # 信号强度（0-100）
+    signal_strength:
+      formula: "min(100, (volume_change * 50) + (price_change * 30))"
+    
+    # 消息模板（Jinja2）
+    message_template: |
+      🔔 **量增价升信号**
+      
+      Token: {{ symbol }}
+      价格: ${{ price | round(8) }}
+      涨幅: {{ price_change_pct | round(2) }}%
+      成交量: {{ volume | format_number }}
+      成交量变化: {{ volume_change_pct | round(2) }}%
+      
+      信号强度: {{ signal_strength }}/100
+
+  # 示例2: 链上模式策略 - 大户买入
+  - name: "大户买入"
+    description: "检测到大户地址大量买入"
+    mode: "onchain"
+    enabled: true
+    
+    conditions:
+      - field: "whale_buy_volume"
+        operator: ">"
+        value: "10000 * price"  # 买入金额超过10000 USDT
+      
+      - field: "unique_buyers"
+        operator: ">"
+        value: 50
+        description: "独立买家数量超过50"
+      
+      - field: "wash_trading_flag"
+        operator: "=="
+        value: false
+        description: "非刷量交易"
+    
+    onchain_fields:
+      whale_buy_volume: "sum(buy_volume where address in whale_addresses)"
+      unique_buyers: "unique_buyers"
+      wash_trading_flag: "wash_trading_flag"
+    
+    message_template: |
+      🐋 **大户买入信号**
+      
+      Token: {{ token_address }}
+      价格: ${{ price | round(8) }}
+      大户买入量: {{ whale_buy_volume | format_number }}
+      独立买家: {{ unique_buyers }}
+      
+      🔗 [查看链上数据](https://solscan.io/token/{{ token_address }})
+
+  # 示例3: 双模式策略 - 天量见顶
+  - name: "天量见顶"
+    description: "成交量异常放大但价格下跌，可能见顶"
+    mode: "both"
+    enabled: true
+    
+    conditions:
+      - field: "volume"
+        operator: ">"
+        value: "3 * avg_volume_24h"
+        description: "成交量超过24小时平均值的3倍"
+      
+      - field: "price_change"
+        operator: "<"
+        value: -0.05
+        description: "价格下跌超过5%"
+      
+      - field: "sell_volume_ratio"
+        operator: ">"
+        value: 0.7
+        description: "卖出量占比超过70%"
+    
+    kline_fields:
+      volume: "volume"
+      price_change: "(close - open) / open"
+      sell_volume_ratio: "1 - (buy_volume / total_volume)"  # 估算
+      avg_volume_24h: "avg(volume, 24h)"
+    
+    onchain_fields:
+      volume: "total_volume"
+      price_change: "(price - prev_price) / prev_price"
+      sell_volume_ratio: "sell_volume / total_volume"
+      avg_volume_24h: "avg(total_volume, 24h)"
+    
+    message_template: |
+      ⚠️ **天量见顶警告**
+      
+      Token: {{ symbol }}
+      价格: ${{ price | round(8) }}
+      跌幅: {{ price_change_pct | round(2) }}%
+      成交量: {{ volume | format_number }}
+      卖出占比: {{ sell_volume_ratio_pct | round(2) }}%
+      
+      💡 建议: 注意风险，可能见顶
+
+# 全局变量定义
+variables:
+  volume_mult: 1.5  # 默认成交量倍数
+  price_change_threshold: 0.05  # 价格变化阈值（5%）
+  whale_threshold: 10000  # 大户阈值（USDT）
+
