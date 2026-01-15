@@ -9,7 +9,11 @@ services:
     restart: unless-stopped
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
+      - TG_PROXY_URL=${TG_PROXY_URL:-}
+      - DEX_PROXY_URL=${DEX_PROXY_URL:-}
       - TZ=Asia/Shanghai
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./data:/app/data
       - ./config:/app/config

@@ -10,8 +10,14 @@ ENV/
 
 # 配置文件
 .env
+.env.local
+.env.*.local
 config/*.db
 config/*.json
+
+# Session文件（Pyrogram）
+*.session
+*.session-journal
 
 # 数据目录
 data/

@@ -102,7 +102,7 @@ sequenceDiagram
     Config-->>Extractor: mode: "kline"
     
     Extractor->>Adapter: get_data(token, mode="kline")
-    Adapter->>DexScreener: fetch_klines(token, intervals=[5m,15m,1h])
+    Adapter->>DexScreener: fetch_klines(token, intervals=[1m,5m,15m])
     DexScreener-->>Adapter: OHLCV + txns数据
     Adapter->>Adapter: 转换为标准K线格式
     Adapter-->>Strategy: StandardKlineData
@@ -163,7 +163,7 @@ class DataSourceMode(Enum):
 class StandardKlineData:
     """标准K线数据结构"""
     symbol: str
-    interval: str  # 5m, 15m, 1h
+    interval: str  # 1m, 5m, 15m
     timestamp: datetime
     open: float
     high: float

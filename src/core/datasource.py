@@ -19,7 +19,7 @@ class DataSourceMode(Enum):
 class StandardKlineData:
     """标准K线数据结构（模式A）"""
     symbol: str
-    interval: str  # 5m, 15m, 1h
+    interval: str  # 1m, 5m, 15m
     timestamp: datetime
     open: float
     high: float
@@ -29,6 +29,9 @@ class StandardKlineData:
     quote_volume: Optional[float] = None  # 成交额
     txns: Optional[int] = None  # 交易笔数（DexScreener特有）
     trades: Optional[int] = None  # 交易次数（Binance/Bybit）
+    price_change_24h: Optional[float] = None  # 24小时价格变化百分比（DexScreener提供）
+    market_cap: Optional[float] = None  # 市值（Market Cap）
+    token_address: Optional[str] = None  # Token合约地址（CA）
     
     def to_dict(self) -> dict:
         """转换为字典"""
@@ -43,7 +46,10 @@ class StandardKlineData:
             "volume": self.volume,
             "quote_volume": self.quote_volume,
             "txns": self.txns,
-            "trades": self.trades
+            "trades": self.trades,
+            "price_change_24h": self.price_change_24h,
+            "market_cap": self.market_cap,
+            "token_address": self.token_address
         }
 
 
